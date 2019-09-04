@@ -1,0 +1,4 @@
+---
+- name: install etcd-operator
+  shell: helm install eservice/etcd-operator
+  when: "'masters' in group_names"

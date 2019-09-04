@@ -1,0 +1,25 @@
+- name: "Check helm plugin install status"
+  shell: helm plugin list | grep helm-gitlab | wc -l
+  register: helm_plugin_gitlab_installed
+  when: "inventory_hostname == groups['masters'][0]"
+
+- debug:
+    msg: "helm plugin status = {{ helm_plugin_gitlab_installed.stdout }}"
+  when: "inventory_hostname == groups['masters'][0]"
+
+- name: "Install helm plugin"
+  shell: helm plugin install git@gitlab.xpaas.lenovo.com:eservice/helm-repo.git
+  when: "inventory_hostname == groups['masters'][0] and helm_plugin_gitlab_installed.stdout != 1"
+
+- name: "Update helm plugin if already installed"
+  shell: helm plugin update helm-gitlab
+  when: "inventory_hostname == groups['masters'][0] and helm_plugin_gitlab_installed.stdout == 1"
+
+- name: "Add eservice stable repo"
+  shell: helm repo add eservice gitlab://gitlab.xpaas.lenovo.com/eservice/helm-repo:master:kubernetes/stable
+  ignore_errors: true
+  when: "inventory_hostname == groups['masters'][0]"
+
+- name: install etcd-operator
+  import_tasks: tasks/etcd-operator.yml
+  when: "inventory_hostname == groups['masters'][0]"

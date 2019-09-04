@@ -1,0 +1,6 @@
+
+- name: Create modules
+  hosts: all
+  gather_facts: no
+  roles:
+    - modules
